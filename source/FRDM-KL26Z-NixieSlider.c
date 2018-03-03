@@ -59,7 +59,7 @@ int main(void) {
     BOARD_InitDebugConsole();
 
     /* Create control queues and events group */
-    QueueHandle_t pwmCtrlQueue = xQueueCreate(2, sizeof(chCtrlMsg_t));
+    QueueHandle_t pwmCtrlQueue = xQueueCreate(10, sizeof(chCtrlMsg_t));
 
     /* Check the result of queues and events group creation */
     if(pwmCtrlQueue) {

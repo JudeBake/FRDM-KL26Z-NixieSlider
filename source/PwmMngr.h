@@ -4,7 +4,7 @@
  *  Created on: 3 mars 2018
  *      Author: julienbacon
  *
- *  <one line to give the program's name and a brief idea of what it does.>
+ *  FRDM-KL26Z-NixieSlider: Controlling IN-9 through touch slider and PWM.
  *  Copyright (C) 3 mars 2018  Julien Bacon "julien.bacon.1@gmail.com"
  *
  *  This program is free software; you can redistribute it and/or modify
