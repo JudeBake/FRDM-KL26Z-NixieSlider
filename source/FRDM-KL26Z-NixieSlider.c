@@ -38,9 +38,13 @@
 #include "pin_mux.h"
 #include "clock_config.h"
 #include "MKL26Z4.h"
-/* TODO: insert other include files here. */
 
-/* TODO: insert other definitions and declarations here. */
+#include "FreeRTOS.h"
+#include "queue.h"
+#include "task.h"
+
+#include "channelCtrl.h"
+#include "PwmMngr.h"
 
 /*
  * @brief   Application entry point.
@@ -54,13 +58,20 @@ int main(void) {
   	/* Init FSL debug console. */
     BOARD_InitDebugConsole();
 
-    printf("Hello World\n");
+    /* Create control queues and events group */
+    QueueHandle_t pwmCtrlQueue = xQueueCreate(2, sizeof(chCtrlMsg_t));
 
-    /* Force the counter to be placed into memory. */
-    volatile static int i = 0 ;
-    /* Enter an infinite loop, just incrementing a counter. */
-    while(1) {
-        i++ ;
+    /* Check the result of queues and events group creation */
+    if(pwmCtrlQueue) {
+    	/* Create tasks */
+    	xTaskCreate(pwmMngrTask, "PwmMngrTask", 250, (void *)pwmCtrlQueue, 1,
+    			NULL);
+
+    	/* Start scheduler */
+    	vTaskStartScheduler();
+    } else {
+    	printf("Error creating control queues and events group.\n");
     }
+
     return 0 ;
 }
