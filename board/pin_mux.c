@@ -15,7 +15,8 @@ processor_version: 3.0.1
 board: FRDM-KL26Z
 pin_labels:
 - {pin_num: '62', pin_signal: ADC0_SE6b/PTD5/SPI1_SCK/UART2_TX/TPM0_CH5, label: 'J2[12]/D13/LED_BLUE', identifier: LED_BLUE}
-- {pin_num: '43', pin_signal: ADC0_SE14/TSI0_CH13/PTC0/EXTRG_IN/USB_SOF_OUT/CMP0_OUT/I2S0_TXD0, label: 'J1[5]/I2S_TXD', identifier: DEVICE_SELECT}
+- {pin_num: '43', pin_signal: ADC0_SE14/TSI0_CH13/PTC0/EXTRG_IN/USB_SOF_OUT/CMP0_OUT/I2S0_TXD0, label: 'J1[5]/I2S_TXD'}
+- {pin_num: '50', pin_signal: PTC5/LLWU_P9/SPI0_SCK/LPTMR0_ALT2/I2S0_RXD0/CMP0_OUT, label: 'J4[9]/CMP_OUT', identifier: DEVICE_SELECT}
 - {pin_num: '44', pin_signal: ADC0_SE15/TSI0_CH14/PTC1/LLWU_P6/RTC_CLKIN/I2C1_SCL/TPM0_CH0/I2S0_TXD0, label: 'J4[12]/A5', identifier: NIXIE}
  * BE CAREFUL MODIFYING THIS COMMENT - IT IS YAML SETTINGS FOR TOOLS ***********
  */
@@ -44,8 +45,6 @@ BOARD_InitPins:
 - pin_list:
   - {pin_num: '23', peripheral: UART0, signal: RX, pin_signal: TSI0_CH2/PTA1/UART0_RX/TPM2_CH0}
   - {pin_num: '24', peripheral: UART0, signal: TX, pin_signal: TSI0_CH3/PTA2/UART0_TX/TPM2_CH1}
-  - {pin_num: '43', peripheral: GPIOC, signal: 'GPIO, 0', pin_signal: ADC0_SE14/TSI0_CH13/PTC0/EXTRG_IN/USB_SOF_OUT/CMP0_OUT/I2S0_TXD0, direction: INPUT, slew_rate: fast,
-    pull_enable: enable}
   - {pin_num: '46', peripheral: GPIOC, signal: 'GPIO, 3', pin_signal: PTC3/LLWU_P7/UART1_RX/TPM0_CH2/CLKOUT/I2S0_TX_BCLK, direction: INPUT, pull_enable: enable}
   - {peripheral: LPTMR0, signal: 'ALT, 0', pin_signal: CMP0_Signal}
   - {pin_num: '44', peripheral: TPM0, signal: 'CH, 0', pin_signal: ADC0_SE15/TSI0_CH14/PTC1/LLWU_P6/RTC_CLKIN/I2C1_SCL/TPM0_CH0/I2S0_TXD0}
@@ -54,6 +53,7 @@ BOARD_InitPins:
   - {pin_num: '62', peripheral: TPM0, signal: 'CH, 5', pin_signal: ADC0_SE6b/PTD5/SPI1_SCK/UART2_TX/TPM0_CH5}
   - {pin_num: '39', peripheral: TSI0, signal: 'CH, 9', pin_signal: TSI0_CH9/PTB16/SPI1_MOSI/UART0_RX/TPM_CLKIN0/SPI1_MISO}
   - {pin_num: '40', peripheral: TSI0, signal: 'CH, 10', pin_signal: TSI0_CH10/PTB17/SPI1_MISO/UART0_TX/TPM_CLKIN1/SPI1_MOSI}
+  - {pin_num: '50', peripheral: GPIOC, signal: 'GPIO, 5', pin_signal: PTC5/LLWU_P9/SPI0_SCK/LPTMR0_ALT2/I2S0_RXD0/CMP0_OUT, direction: INPUT, pull_enable: enable}
  * BE CAREFUL MODIFYING THIS COMMENT - IT IS YAML SETTINGS FOR TOOLS ***********
  */
 /* clang-format on */
@@ -89,20 +89,6 @@ void BOARD_InitPins(void)
     /* PORTB17 (pin 40) is configured as TSI0_CH10 */
     PORT_SetPinMux(BOARD_INITPINS_TSI_ELECTRODE_2_PORT, BOARD_INITPINS_TSI_ELECTRODE_2_PIN, kPORT_PinDisabledOrAnalog);
 
-    /* PORTC0 (pin 43) is configured as PTC0 */
-    PORT_SetPinMux(BOARD_INITPINS_DEVICE_SELECT_PORT, BOARD_INITPINS_DEVICE_SELECT_PIN, kPORT_MuxAsGpio);
-
-    PORTC->PCR[0] = ((PORTC->PCR[0] &
-                      /* Mask bits to zero which are setting */
-                      (~(PORT_PCR_PE_MASK | PORT_PCR_SRE_MASK | PORT_PCR_ISF_MASK)))
-
-                     /* Pull Enable: Internal pullup or pulldown resistor is enabled on the corresponding pin. */
-                     | (uint32_t)(PORT_PCR_PE_MASK)
-
-                     /* Slew Rate Enable: Fast slew rate is configured on the corresponding pin, if the pin is
-                      * configured as a digital output. */
-                     | PORT_PCR_SRE(kPORT_FastSlewRate));
-
     /* PORTC1 (pin 44) is configured as TPM0_CH0 */
     PORT_SetPinMux(BOARD_INITPINS_NIXIE_PORT, BOARD_INITPINS_NIXIE_PIN, kPORT_MuxAlt4);
 
@@ -110,6 +96,16 @@ void BOARD_InitPins(void)
     PORT_SetPinMux(BOARD_INITPINS_SW1_PORT, BOARD_INITPINS_SW1_PIN, kPORT_MuxAsGpio);
 
     PORTC->PCR[3] = ((PORTC->PCR[3] &
+                      /* Mask bits to zero which are setting */
+                      (~(PORT_PCR_PE_MASK | PORT_PCR_ISF_MASK)))
+
+                     /* Pull Enable: Internal pullup or pulldown resistor is enabled on the corresponding pin. */
+                     | (uint32_t)(PORT_PCR_PE_MASK));
+
+    /* PORTC5 (pin 50) is configured as PTC5 */
+    PORT_SetPinMux(BOARD_INITPINS_DEVICE_SELECT_PORT, BOARD_INITPINS_DEVICE_SELECT_PIN, kPORT_MuxAsGpio);
+
+    PORTC->PCR[5] = ((PORTC->PCR[5] &
                       /* Mask bits to zero which are setting */
                       (~(PORT_PCR_PE_MASK | PORT_PCR_ISF_MASK)))
 

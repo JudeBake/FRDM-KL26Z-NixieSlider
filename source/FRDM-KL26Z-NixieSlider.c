@@ -40,11 +40,17 @@
 #include "MKL26Z4.h"
 
 #include "FreeRTOS.h"
+#include "event_groups.h"
 #include "queue.h"
 #include "task.h"
 
 #include "channelCtrl.h"
+#include "deviceCtrl.h"
+#include "LedDevMngr.h"
 #include "PwmMngr.h"
+
+#define ALL_LED_CONFIG_CREATED			7U
+#define DEVICE_SELECT_PIN				5U
 
 /*
  * @brief   Application entry point.
@@ -58,14 +64,55 @@ int main(void) {
   	/* Init FSL debug console. */
     BOARD_InitDebugConsole();
 
+    /* Check the selected device */
+    uint8_t selectedDevice = (uint8_t)GPIO_ReadPinInput(MODE_GPIO,
+    		DEVICE_SELECT_PIN);
+
+    /* Configurations */
+    ledDevConfig_t *ledConfigs[MAX_LED_CH] = {NULL, NULL, NULL};
+    uint8_t ledDevConfigsCreated = 0U;
+
     /* Create control queues and events group */
     QueueHandle_t pwmCtrlQueue = xQueueCreate(10, sizeof(chCtrlMsg_t));
+    QueueHandle_t ledCtrlQueues[MAX_LED_CH] = {NULL, NULL, NULL};
+    EventGroupHandle_t events = xEventGroupCreate();
+
+    /* Initialize device configurations */
+    if(selectedDevice) {
+    	pwmChIdx_t ledChIdx[MAX_LED_CH] = {RED_CH, GRN_CH, BLU_CH};
+    	for(uint8_t i = 0; i < MAX_LED_CH; ++i) {
+    		ledCtrlQueues[i] = xQueueCreate(1, sizeof(devCtrlMsg_t));
+
+    		if(ledCtrlQueues[i]) {
+    			ledConfigs[i] = pvPortMalloc(sizeof(ledDevConfig_t));
+    			if(ledConfigs[i]) {
+    				ledConfigs[i]->ledChannel = ledChIdx[i];
+    				ledConfigs[i]->events = events;
+    				ledConfigs[i]->inputCtrlQueue = ledCtrlQueues[i];
+    				ledConfigs[i]->outputCtrlQueue = pwmCtrlQueue;
+    				ledDevConfigsCreated |= (1U << i);
+    			}
+    		}
+    	}
+    }
 
     /* Check the result of queues and events group creation */
-    if(pwmCtrlQueue) {
+    if(pwmCtrlQueue && events &&
+    		(ledDevConfigsCreated == ALL_LED_CONFIG_CREATED)) {
     	/* Create tasks */
+    	if(selectedDevice) {
+    		char *ledMngrTaskNames[MAX_LED_CH] = {"RedDevMngrTask",
+    											  "GrnDevMngrTask",
+												  "BluDevMngrTask"};
+    		for(uint8_t i = 0; i < MAX_LED_CH; ++i) {
+    			xTaskCreate(ledDevMngrTask, ledMngrTaskNames[i], 250,
+    					(void *)ledConfigs[i], 2, NULL);
+    		}
+    	}
+
     	xTaskCreate(pwmMngrTask, "PwmMngrTask", 250, (void *)pwmCtrlQueue, 1,
     			NULL);
+
 
     	/* Start scheduler */
     	vTaskStartScheduler();

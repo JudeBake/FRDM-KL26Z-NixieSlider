@@ -19,7 +19,8 @@
             <processor_version>3.0.1</processor_version>
             <pin_labels>
                <pin_label pin_num="62" pin_signal="ADC0_SE6b/PTD5/SPI1_SCK/UART2_TX/TPM0_CH5" label="J2[12]/D13/LED_BLUE" identifier="LED_BLUE"/>
-               <pin_label pin_num="43" pin_signal="ADC0_SE14/TSI0_CH13/PTC0/EXTRG_IN/USB_SOF_OUT/CMP0_OUT/I2S0_TXD0" label="J1[5]/I2S_TXD" identifier="DEVICE_SELECT"/>
+               <pin_label pin_num="43" pin_signal="ADC0_SE14/TSI0_CH13/PTC0/EXTRG_IN/USB_SOF_OUT/CMP0_OUT/I2S0_TXD0" label="J1[5]/I2S_TXD" identifier=""/>
+               <pin_label pin_num="50" pin_signal="PTC5/LLWU_P9/SPI0_SCK/LPTMR0_ALT2/I2S0_RXD0/CMP0_OUT" label="J4[9]/CMP_OUT" identifier="DEVICE_SELECT"/>
                <pin_label pin_num="44" pin_signal="ADC0_SE15/TSI0_CH14/PTC1/LLWU_P6/RTC_CLKIN/I2C1_SCL/TPM0_CH0/I2S0_TXD0" label="J4[12]/A5" identifier="NIXIE"/>
             </pin_labels>
          </pins_profile>
@@ -71,13 +72,6 @@
                <pins>
                   <pin peripheral="UART0" signal="RX" pin_num="23" pin_signal="TSI0_CH2/PTA1/UART0_RX/TPM2_CH0"/>
                   <pin peripheral="UART0" signal="TX" pin_num="24" pin_signal="TSI0_CH3/PTA2/UART0_TX/TPM2_CH1"/>
-                  <pin peripheral="GPIOC" signal="GPIO, 0" pin_num="43" pin_signal="ADC0_SE14/TSI0_CH13/PTC0/EXTRG_IN/USB_SOF_OUT/CMP0_OUT/I2S0_TXD0">
-                     <pin_features>
-                        <pin_feature name="direction" value="INPUT"/>
-                        <pin_feature name="slew_rate" value="fast"/>
-                        <pin_feature name="pull_enable" value="enable"/>
-                     </pin_features>
-                  </pin>
                   <pin peripheral="GPIOC" signal="GPIO, 3" pin_num="46" pin_signal="PTC3/LLWU_P7/UART1_RX/TPM0_CH2/CLKOUT/I2S0_TX_BCLK">
                      <pin_features>
                         <pin_feature name="direction" value="INPUT"/>
@@ -91,6 +85,12 @@
                   <pin peripheral="TPM0" signal="CH, 5" pin_num="62" pin_signal="ADC0_SE6b/PTD5/SPI1_SCK/UART2_TX/TPM0_CH5"/>
                   <pin peripheral="TSI0" signal="CH, 9" pin_num="39" pin_signal="TSI0_CH9/PTB16/SPI1_MOSI/UART0_RX/TPM_CLKIN0/SPI1_MISO"/>
                   <pin peripheral="TSI0" signal="CH, 10" pin_num="40" pin_signal="TSI0_CH10/PTB17/SPI1_MISO/UART0_TX/TPM_CLKIN1/SPI1_MOSI"/>
+                  <pin peripheral="GPIOC" signal="GPIO, 5" pin_num="50" pin_signal="PTC5/LLWU_P9/SPI0_SCK/LPTMR0_ALT2/I2S0_RXD0/CMP0_OUT">
+                     <pin_features>
+                        <pin_feature name="direction" value="INPUT"/>
+                        <pin_feature name="pull_enable" value="enable"/>
+                     </pin_features>
+                  </pin>
                </pins>
             </function>
          </functions_list>
@@ -255,12 +255,12 @@
                         <data type="Boolean">true</data>
                      </feature>
                   </dependency>
-                  <dependency resourceType="PeripheralUnifiedSignal" resourceId="GPIOC.port.0" description="Signal channel 0 of the peripheral GPIOC is not routed." problem_level="1" source="Peripherals: BOARD_InitPeripherals">
+                  <dependency resourceType="PeripheralUnifiedSignal" resourceId="GPIOC.port.5" description="Signal channel 5 of the peripheral GPIOC is not routed." problem_level="1" source="Peripherals: BOARD_InitPeripherals">
                      <feature name="routed" evaluation="">
                         <data type="Boolean">true</data>
                      </feature>
                   </dependency>
-                  <dependency resourceType="PeripheralUnifiedSignal" resourceId="GPIOC.port.0" description="Direction of channel 0 of peripheral GPIOC does not match with direction in pins tool." problem_level="1" source="Peripherals: BOARD_InitPeripherals">
+                  <dependency resourceType="PeripheralUnifiedSignal" resourceId="GPIOC.port.5" description="Direction of channel 5 of peripheral GPIOC does not match with direction in pins tool." problem_level="1" source="Peripherals: BOARD_InitPeripherals">
                      <feature name="direction" evaluation="equal">
                         <data type="String">INPUT</data>
                      </feature>
@@ -359,7 +359,7 @@
                         </struct>
                         <array name="gpio_config">
                            <struct name="0">
-                              <setting name="signal_number" value="GPIO.0"/>
+                              <setting name="signal_number" value="GPIO.5"/>
                               <setting name="pinDirection" value="kGPIO_DigitalInput"/>
                               <setting name="interrupt_configuration" value="kPORT_InterruptOrDMADisabled"/>
                               <setting name="outputLogic" value="0U"/>
