@@ -100,6 +100,20 @@ void ledDevMngrTask(void *p) {
 				pdTRUE, pdFALSE, taskPeriod);
 
 		if((event & MODE_EVENT)) {
+			switch(device.ledMode) {
+			case RGB:
+				device.ledMode = RED;
+				break;
+			case RED:
+				device.ledMode = GRN;
+				break;
+			case GRN:
+				device.ledMode = BLU;
+				break;
+			case BLU:
+				device.ledMode = RGB;
+				break;
+			}
 			changeMode(&device);
 		}
 
@@ -199,14 +213,28 @@ void processDevPwm(devCtrlMsg_t inputCmd, ledDevice_t *device) {
 
 /* Device updating functions */
 void turnOffDevice(ledDevice_t *device) {
+	chCtrlMsg_t chCtrlMsg;
 	device->previousDutyCycle = device->activeDutyCycle;
 	device->activeDutyCycle = DUTY_MIN;
-	updateDevice(device);
+	chCtrlMsg.chIndex = device->config->ledChannel;
+	chCtrlMsg.dutyCycle = device->activeDutyCycle;
+	printf("Updating LED %s to %d duty cycle.\n",
+			ledDevNames[device->config->ledChannel - MAX_NIXIE_CH],
+			device->activeDutyCycle);
+	xQueueSendToBack(device->config->outputCtrlQueue, &chCtrlMsg,
+			portMAX_DELAY);
 }
 
 void restoreDevice(ledDevice_t *device) {
+	chCtrlMsg_t chCtrlMsg;
 	device->activeDutyCycle = device->previousDutyCycle;
-	updateDevice(device);
+	chCtrlMsg.chIndex = device->config->ledChannel;
+	chCtrlMsg.dutyCycle = device->activeDutyCycle;
+	printf("Updating LED %s to %d duty cycle.\n",
+			ledDevNames[device->config->ledChannel - MAX_NIXIE_CH],
+			device->activeDutyCycle);
+	xQueueSendToBack(device->config->outputCtrlQueue, &chCtrlMsg,
+			portMAX_DELAY);
 }
 
 void updateDevice(ledDevice_t *device) {
@@ -214,7 +242,7 @@ void updateDevice(ledDevice_t *device) {
 	device->previousDutyCycle = device->activeDutyCycle;
 	chCtrlMsg.chIndex = device->config->ledChannel;
 	chCtrlMsg.dutyCycle = device->activeDutyCycle;
-	printf("Updating LED %s to %d duty cycle",
+	printf("Updating LED %s to %d duty cycle.\n",
 			ledDevNames[device->config->ledChannel - MAX_NIXIE_CH],
 			device->activeDutyCycle);
 	xQueueSendToBack(device->config->outputCtrlQueue, &chCtrlMsg,

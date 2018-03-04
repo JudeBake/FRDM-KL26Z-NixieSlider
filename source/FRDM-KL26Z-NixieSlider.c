@@ -47,6 +47,7 @@
 #include "channelCtrl.h"
 #include "deviceCtrl.h"
 #include "LedDevMngr.h"
+#include "ModeTrigger.h"
 #include "PwmMngr.h"
 
 #define ALL_LED_CONFIG_CREATED			7U
@@ -99,6 +100,9 @@ int main(void) {
     /* Check the result of queues and events group creation */
     if(pwmCtrlQueue && events &&
     		(ledDevConfigsCreated == ALL_LED_CONFIG_CREATED)) {
+    	/* initialize the mode trigger */
+    	initModeTrigger(events);
+
     	/* Create tasks */
     	if(selectedDevice) {
     		char *ledMngrTaskNames[MAX_LED_CH] = {"RedDevMngrTask",
