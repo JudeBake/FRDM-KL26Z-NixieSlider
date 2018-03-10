@@ -62,21 +62,6 @@ void BOARD_InitBootPins(void);
 #define BOARD_INITPINS_DEBUG_UART_TX_NAME "DEBUG_UART_TX"             /*!<@brief Identifier name */
                                                                       /* @} */
 
-/*! @name PORTC0 (number 43), J1[5]/I2S_TXD
-  @{ */
-#define BOARD_INITPINS_DEVICE_SELECT_PERIPHERAL GPIOC                  /*!<@brief Device name: GPIOC */
-#define BOARD_INITPINS_DEVICE_SELECT_SIGNAL GPIO                       /*!<@brief GPIOC signal: GPIO */
-#define BOARD_INITPINS_DEVICE_SELECT_GPIO GPIOC                        /*!<@brief GPIO device name: GPIOC */
-#define BOARD_INITPINS_DEVICE_SELECT_GPIO_PIN 0U                       /*!<@brief PORTC pin index: 0 */
-#define BOARD_INITPINS_DEVICE_SELECT_PORT PORTC                        /*!<@brief PORT device name: PORTC */
-#define BOARD_INITPINS_DEVICE_SELECT_PIN 0U                            /*!<@brief PORTC pin index: 0 */
-#define BOARD_INITPINS_DEVICE_SELECT_CHANNEL 0                         /*!<@brief GPIOC GPIO channel: 0 */
-#define BOARD_INITPINS_DEVICE_SELECT_PIN_NAME PTC0                     /*!<@brief Pin name */
-#define BOARD_INITPINS_DEVICE_SELECT_LABEL "J1[5]/I2S_TXD"             /*!<@brief Label */
-#define BOARD_INITPINS_DEVICE_SELECT_NAME "DEVICE_SELECT"              /*!<@brief Identifier name */
-#define BOARD_INITPINS_DEVICE_SELECT_DIRECTION kPIN_MUX_DirectionInput /*!<@brief Direction */
-                                                                       /* @} */
-
 /*! @name PORTC3 (number 46), SW1
   @{ */
 #define BOARD_INITPINS_SW1_PERIPHERAL GPIOC                  /*!<@brief Device name: GPIOC */
@@ -163,6 +148,21 @@ void BOARD_InitBootPins(void);
 #define BOARD_INITPINS_TSI_ELECTRODE_2_LABEL "E1/TSI0_CH10"   /*!<@brief Label */
 #define BOARD_INITPINS_TSI_ELECTRODE_2_NAME "TSI_ELECTRODE_2" /*!<@brief Identifier name */
                                                               /* @} */
+
+/*! @name PORTC5 (number 50), J4[9]/CMP_OUT
+  @{ */
+#define BOARD_INITPINS_DEVICE_SELECT_PERIPHERAL GPIOC                  /*!<@brief Device name: GPIOC */
+#define BOARD_INITPINS_DEVICE_SELECT_SIGNAL GPIO                       /*!<@brief GPIOC signal: GPIO */
+#define BOARD_INITPINS_DEVICE_SELECT_GPIO GPIOC                        /*!<@brief GPIO device name: GPIOC */
+#define BOARD_INITPINS_DEVICE_SELECT_GPIO_PIN 5U                       /*!<@brief PORTC pin index: 5 */
+#define BOARD_INITPINS_DEVICE_SELECT_PORT PORTC                        /*!<@brief PORT device name: PORTC */
+#define BOARD_INITPINS_DEVICE_SELECT_PIN 5U                            /*!<@brief PORTC pin index: 5 */
+#define BOARD_INITPINS_DEVICE_SELECT_CHANNEL 5                         /*!<@brief GPIOC GPIO channel: 5 */
+#define BOARD_INITPINS_DEVICE_SELECT_PIN_NAME PTC5                     /*!<@brief Pin name */
+#define BOARD_INITPINS_DEVICE_SELECT_LABEL "J4[9]/CMP_OUT"             /*!<@brief Label */
+#define BOARD_INITPINS_DEVICE_SELECT_NAME "DEVICE_SELECT"              /*!<@brief Identifier name */
+#define BOARD_INITPINS_DEVICE_SELECT_DIRECTION kPIN_MUX_DirectionInput /*!<@brief Direction */
+                                                                       /* @} */
 
 /*!
  * @brief Configures pin routing and optionally pin electrical features.

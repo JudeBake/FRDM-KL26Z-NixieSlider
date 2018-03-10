@@ -160,7 +160,7 @@ instance:
       - enable_custom_name: 'false'
     - gpio_config:
       - 0:
-        - signal_number: 'GPIO.0'
+        - signal_number: 'GPIO.5'
         - pinDirection: 'kGPIO_DigitalInput'
         - interrupt_configuration: 'kPORT_InterruptOrDMADisabled'
         - outputLogic: '0U'
@@ -188,8 +188,8 @@ void MODE_init(void) {
   PORT_SetPinInterruptConfig(MODE_PORT, 3U, kPORT_InterruptFallingEdge);
   /* Enable interrupt PORTC_PORTD_IRQn request in the NVIC */
   EnableIRQ(PORTC_PORTD_IRQn);
-  /* Initialize GPIO functionality on pin PTC0 */
-  GPIO_PinInit(MODE_GPIO, 0U, &MODE_config[0]);
+  /* Initialize GPIO functionality on pin PTC5 */
+  GPIO_PinInit(MODE_GPIO, 5U, &MODE_config[0]);
   /* Initialize GPIO functionality on pin PTC3 */
   GPIO_PinInit(MODE_GPIO, 3U, &MODE_config[1]);
 }
