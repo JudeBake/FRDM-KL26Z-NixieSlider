@@ -122,7 +122,6 @@ void ledDevMngrTask(void *p) {
 
 			/* Process input command and send output command */
 			processDevPwm(devCommand, &device);
-			updateDevice(&device);
 		}
 	}
 }
@@ -192,21 +191,25 @@ void processDevPwm(devCtrlMsg_t inputCmd, ledDevice_t *device) {
 	case RGB:
 		if(device->ledIsActive) {
 			device->activeDutyCycle = newDutyCycle;
+			updateDevice(device);
 		}
 		break;
 	case RED:
 		if(device->config->ledChannel == RED_CH) {
 			device->activeDutyCycle = newDutyCycle;
+			updateDevice(device);
 		}
 		break;
 	case GRN:
 		if(device->config->ledChannel == GRN_CH) {
 			device->activeDutyCycle = newDutyCycle;
+			updateDevice(device);
 		}
 		break;
 	case BLU:
 		if(device->config->ledChannel == BLU_CH) {
 			device->activeDutyCycle = newDutyCycle;
+			updateDevice(device);
 		}
 		break;
 	}
