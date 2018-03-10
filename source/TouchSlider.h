@@ -1,11 +1,11 @@
 /*
- * ModeTrigger.c
+ * TouchSlider.h
  *
- *  Created on: 3 mars 2018
+ *  Created on: 4 mars 2018
  *      Author: julienbacon
  *
  *  FRDM-KL26Z-NixieSlider: Controlling IN-9 through touch slider and PWM.
- *  Copyright (C) 3 mars 2018  Julien Bacon "julien.bacon.1@gmail.com"
+ *  Copyright (C) 4 mars 2018  Julien Bacon "julien.bacon.1@gmail.com"
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -22,35 +22,13 @@
  *  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <ModeTrigger.h>
-#include <stdio.h>
+#ifndef TOUCHSLIDER_H_
+#define TOUCHSLIDER_H_
 
-#include "fsl_gpio.h"
-#include "peripherals.h"
+#include "FreeRTOS.h"
+#include "queue.h"
 
-#include "events.h"
+/* Initialize touch slider */
+void initTouchSlider(QueueHandle_t iDeviceQueues[], uint8_t iDeviceNb);
 
-#define MODE_CHANGE_IRQ			MODE_IRQHANDLER
-#define MODE_CHANGE_IRQ_FLAG	(1U << 3U)
-
-static EventGroupHandle_t events = NULL;
-
-void MODE_CHANGE_IRQ(void) {
-	BaseType_t xHigherPriorityTaskWoken = pdTRUE;
-
-	printf("Mode change IRQ.\n");
-
-	/* Clear GPIO interrupt flag */
-	GPIO_ClearPinsInterruptFlags(MODE_GPIO, MODE_CHANGE_IRQ_FLAG);
-
-	/* Send mode change event if event group have been instantiated */
-	if (events) {
-		xEventGroupSetBitsFromISR(events, MODE_EVENT,
-				&xHigherPriorityTaskWoken);
-		portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
-	}
-}
-
-void initModeTrigger(EventGroupHandle_t iEvents) {
-	events = iEvents;
-}
+#endif /* TOUCHSLIDER_H_ */

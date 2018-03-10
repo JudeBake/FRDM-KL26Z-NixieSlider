@@ -49,6 +49,7 @@
 #include "LedDevMngr.h"
 #include "ModeTrigger.h"
 #include "PwmMngr.h"
+#include "touchSlider.h"
 
 #define ALL_LED_CONFIG_CREATED			7U
 #define DEVICE_SELECT_PIN				5U
@@ -75,21 +76,23 @@ int main(void) {
 
     /* Create control queues and events group */
     QueueHandle_t pwmCtrlQueue = xQueueCreate(10, sizeof(chCtrlMsg_t));
-    QueueHandle_t ledCtrlQueues[MAX_LED_CH] = {NULL, NULL, NULL};
+    QueueHandle_t devCtrlQueues[MAX_PWM_CH] = {NULL};
+    uint8_t deviceNb;
     EventGroupHandle_t events = xEventGroupCreate();
 
     /* Initialize device configurations */
     if(selectedDevice) {
+    	deviceNb = MAX_LED_CH;
     	pwmChIdx_t ledChIdx[MAX_LED_CH] = {RED_CH, GRN_CH, BLU_CH};
-    	for(uint8_t i = 0; i < MAX_LED_CH; ++i) {
-    		ledCtrlQueues[i] = xQueueCreate(1, sizeof(devCtrlMsg_t));
+    	for(uint8_t i = 0; i < deviceNb; ++i) {
+    		devCtrlQueues[i] = xQueueCreate(1, sizeof(devCtrlMsg_t));
 
-    		if(ledCtrlQueues[i]) {
+    		if(devCtrlQueues[i]) {
     			ledConfigs[i] = pvPortMalloc(sizeof(ledDevConfig_t));
     			if(ledConfigs[i]) {
     				ledConfigs[i]->ledChannel = ledChIdx[i];
     				ledConfigs[i]->events = events;
-    				ledConfigs[i]->inputCtrlQueue = ledCtrlQueues[i];
+    				ledConfigs[i]->inputCtrlQueue = devCtrlQueues[i];
     				ledConfigs[i]->outputCtrlQueue = pwmCtrlQueue;
     				ledDevConfigsCreated |= (1U << i);
     			}
@@ -100,8 +103,11 @@ int main(void) {
     /* Check the result of queues and events group creation */
     if(pwmCtrlQueue && events &&
     		(ledDevConfigsCreated == ALL_LED_CONFIG_CREATED)) {
-    	/* initialize the mode trigger */
+    	/* Initialize the mode trigger */
     	initModeTrigger(events);
+
+    	/* Initialize the touch slider */
+    	initTouchSlider(devCtrlQueues, deviceNb);
 
     	/* Create tasks */
     	if(selectedDevice) {
@@ -109,12 +115,12 @@ int main(void) {
     											  "GrnDevMngrTask",
 												  "BluDevMngrTask"};
     		for(uint8_t i = 0; i < MAX_LED_CH; ++i) {
-    			xTaskCreate(ledDevMngrTask, ledMngrTaskNames[i], 250,
+    			xTaskCreate(ledDevMngrTask, ledMngrTaskNames[i], 175,
     					(void *)ledConfigs[i], 2, NULL);
     		}
     	}
 
-    	xTaskCreate(pwmMngrTask, "PwmMngrTask", 250, (void *)pwmCtrlQueue, 1,
+    	xTaskCreate(pwmMngrTask, "PwmMngrTask", 150, (void *)pwmCtrlQueue, 1,
     			NULL);
 
 

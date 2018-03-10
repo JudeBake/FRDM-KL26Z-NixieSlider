@@ -122,6 +122,7 @@ void ledDevMngrTask(void *p) {
 
 			/* Process input command and send output command */
 			processDevPwm(devCommand, &device);
+			updateDevice(&device);
 		}
 	}
 }
