@@ -38,9 +38,21 @@
 #include "pin_mux.h"
 #include "clock_config.h"
 #include "MKL26Z4.h"
-/* TODO: insert other include files here. */
 
-/* TODO: insert other definitions and declarations here. */
+#include "FreeRTOS.h"
+#include "event_groups.h"
+#include "queue.h"
+#include "task.h"
+
+#include "channelCtrl.h"
+#include "deviceCtrl.h"
+#include "LedDevMngr.h"
+#include "ModeTrigger.h"
+#include "PwmMngr.h"
+#include "touchSlider.h"
+
+#define ALL_LED_CONFIG_CREATED			7U
+#define DEVICE_SELECT_PIN				5U
 
 /*
  * @brief   Application entry point.
@@ -54,13 +66,69 @@ int main(void) {
   	/* Init FSL debug console. */
     BOARD_InitDebugConsole();
 
-    printf("Hello World\n");
+    /* Check the selected device */
+    uint8_t selectedDevice = (uint8_t)GPIO_ReadPinInput(MODE_GPIO,
+    		DEVICE_SELECT_PIN);
 
-    /* Force the counter to be placed into memory. */
-    volatile static int i = 0 ;
-    /* Enter an infinite loop, just incrementing a counter. */
-    while(1) {
-        i++ ;
+    /* Configurations */
+    ledDevConfig_t *ledConfigs[MAX_LED_CH] = {NULL, NULL, NULL};
+    uint8_t ledDevConfigsCreated = 0U;
+
+    /* Create control queues and events group */
+    QueueHandle_t pwmCtrlQueue = xQueueCreate(10, sizeof(chCtrlMsg_t));
+    QueueHandle_t devCtrlQueues[MAX_PWM_CH] = {NULL};
+    uint8_t deviceNb;
+    EventGroupHandle_t events = xEventGroupCreate();
+
+    /* Initialize device configurations */
+    if(selectedDevice) {
+    	deviceNb = MAX_LED_CH;
+    	pwmChIdx_t ledChIdx[MAX_LED_CH] = {RED_CH, GRN_CH, BLU_CH};
+    	for(uint8_t i = 0; i < deviceNb; ++i) {
+    		devCtrlQueues[i] = xQueueCreate(1, sizeof(devCtrlMsg_t));
+
+    		if(devCtrlQueues[i]) {
+    			ledConfigs[i] = pvPortMalloc(sizeof(ledDevConfig_t));
+    			if(ledConfigs[i]) {
+    				ledConfigs[i]->ledChannel = ledChIdx[i];
+    				ledConfigs[i]->events = events;
+    				ledConfigs[i]->inputCtrlQueue = devCtrlQueues[i];
+    				ledConfigs[i]->outputCtrlQueue = pwmCtrlQueue;
+    				ledDevConfigsCreated |= (1U << i);
+    			}
+    		}
+    	}
     }
+
+    /* Check the result of queues and events group creation */
+    if(pwmCtrlQueue && events &&
+    		(ledDevConfigsCreated == ALL_LED_CONFIG_CREATED)) {
+    	/* Initialize the mode trigger */
+    	initModeTrigger(events);
+
+    	/* Initialize the touch slider */
+    	initTouchSlider(devCtrlQueues, deviceNb);
+
+    	/* Create tasks */
+    	if(selectedDevice) {
+    		char *ledMngrTaskNames[MAX_LED_CH] = {"RedDevMngrTask",
+    											  "GrnDevMngrTask",
+												  "BluDevMngrTask"};
+    		for(uint8_t i = 0; i < MAX_LED_CH; ++i) {
+    			xTaskCreate(ledDevMngrTask, ledMngrTaskNames[i], 175,
+    					(void *)ledConfigs[i], 2, NULL);
+    		}
+    	}
+
+    	xTaskCreate(pwmMngrTask, "PwmMngrTask", 150, (void *)pwmCtrlQueue, 1,
+    			NULL);
+
+
+    	/* Start scheduler */
+    	vTaskStartScheduler();
+    } else {
+    	printf("Error creating control queues and events group.\n");
+    }
+
     return 0 ;
 }
